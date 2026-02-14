@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earth - Carbon Metrics</title>
+</head>
+<style>
+    :root {
+        --earth-bg: #e8f5e9;
+        --earth-primary: #66bb6a;
+        --earth-secondary: #81c784;
+        --earth-light: #c8e6c9;
+        --earth-white: #ffffff;
+        --earth-text: #1b5e20;
+        --earth-gray: #f5f5f5;
+        --earth-border: #a5d6a7;
+        --earth-shadow: rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+        box-sizing: border-box;
+        letter-spacing: 0.3px;
+    }
+
+    body {
+        font-family: 'Andale Mono', monospace;
+        background-color: var(--earth-bg);
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background-image: 
+            radial-gradient(circle at 20% 50%, rgba(129, 199, 132, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(102, 187, 106, 0.1) 0%, transparent 50%);
+    }
+
+    .container {
+        width: 100%;
+        max-width: 440px;
+        position: relative;
+    }
+
+    .phone-screen {
+        width: 100%;
+        max-width: 375px;
+        height: 667px;
+        margin: 0 auto;
+        background: var(--earth-white);
+        border-radius: 36px;
+        box-shadow: 
+            0 20px 60px rgba(0, 0, 0, 0.15),
+            0 0 0 1px rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .header {
+        height: 50px;
+        background: linear-gradient(135deg, var(--earth-primary) 0%, var(--earth-secondary) 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16.5px;
+        font-weight: bold;
+        border-top-left-radius: 30px;
+        border-top-right-radius: 30px;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .header:hover {
+        background: linear-gradient(135deg, var(--earth-secondary) 0%, var(--earth-primary) 100%);
+    }
+
+    .header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 100%;
+        background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+        pointer-events: none;
+    }
+
+    .content {
+        flex: 1;
+        padding: 0 20px 0 20px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .start-page {
+        text-align: center;
+        padding: 30px 20px;
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .profile-pic {
+        width: 120px;
+        height: 120px;
+        display: block;
+        margin: 20px auto;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--earth-light) 0%, var(--earth-secondary) 100%);
+        border: 4px solid var(--earth-primary);
+        font-size: 60px;
+        line-height: 120px;
+        box-shadow: 0 8px 24px var(--earth-shadow);
+        transition: transform 0.3s ease;
+    }
+
+    h1 {
+        font-size: 24.5px;
+        font-weight: bold;
+        color: var(--earth-text);
+        margin: 15px 0 10px 0;
+    }
+
+    .subtitle {
+        font-size: 13.5px;
+        color: #666;
+        margin-bottom: 20px;
+        line-height: 1.4;
+    }
+
+    .note-text {
+        font-size: 12.5px;
+        color: #666;
+        margin: 8px 30px;
+        text-align: left;
+        background: var(--earth-gray);
+        padding: 10px 15px;
+        border-radius: 12px;
+        border-left: 3px solid var(--earth-primary);
+    }
+
+    .chat-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        gap: 8px;
+        overflow-y: auto;
+        scrollbar-width: none;
+        min-height: 0;
+        padding: 20px 0 0 0;
+    }
+
+    .chat-area::-webkit-scrollbar {
+        display: none;
+    }
+
+    .message {
+        padding: 16px 20px;
+        border-radius: 24px;
+        max-width: 80%;
+        line-height: 1.4;
+        font-size: 15px;
+        font-weight: 500;
+        font-family: 'Courier New', Courier, monospace;
+        animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        word-wrap: break-word;
+        margin: 4px 0;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(15px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .message.bot {
+        background: #e8e8e8;
+        color: #000000;
+        align-self: flex-start;
+        border-bottom-left-radius: 6px;
+    }
+
+    .message.user {
+        background: #81c784;
+        color: #000000;
+        align-self: flex-end;
+        border-bottom-right-radius: 6px;
+    }
+
+    .typing-indicator {
+        display: flex;
+        gap: 4px;
+        padding: 16px 20px;
+        background: #e8e8e8;
+        border-radius: 24px;
+        border-bottom-left-radius: 6px;
+        width: fit-content;
+    }
+
+    .typing-indicator span {
+        width: 8px;
+        height: 8px;
+        background: var(--earth-primary);
+        border-radius: 50%;
+        animation: typing 1.4s infinite;
+    }
+
+    .typing-indicator span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .typing-indicator span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes typing {
+        0%, 60%, 100% {
+            transform: translateY(0);
+            opacity: 0.5;
+        }
+        30% {
+            transform: translateY(-10px);
+            opacity: 1;
+        }
+    }
+
+    .options-container {
+        padding: 10px 10px 10px 10px;
+        background: white;
+        flex-shrink: 0;
+        border-top: 1px solid #e0e0e0;
+        overflow: visible;
+    }
+
+    #input-container {
+        padding: 10px 10px 10px 10px;
+        background: white;
+        flex-shrink: 0;
+        border-top: 1px solid #e0e0e0;
+    }
+
+    .button {
+        font-family: 'Andale Mono', monospace;
+        display: block;
+        width: 100%;
+        font-size: 14.5px;
+        padding: 14px 20px;
+        margin: 8px 0;
+        background-color: #a8d5e2;
+        color: #000000;
+        border: 2px solid #8fc5d6;
+        border-radius: 40px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-weight: 500;
+    }
+
+    .button:hover {
+        background-color: #8fc5d6;
+        border-color: #6db3ca;
+        transform: translateY(-2px);
+    }
+
+    .button:active {
+        transform: translateY(0);
+    }
+
+    .button.primary {
+        background: linear-gradient(135deg, #a8d5e2 0%, #8fc5d6 100%);
+        border-color: #a8d5e2;
+        color: #000000;
+        font-weight: bold;
+    }
+
+    .button.primary:hover {
+        background: linear-gradient(135deg, #8fc5d6 0%, #6db3ca 100%);
+        border-color: #8fc5d6;
+    }
+
+    .option-button {
+        font-family: 'Andale Mono', monospace;
+        text-align: center;
+        padding: 10px 0;
+        background: #a8d5e2;
+        border: none;
+        border-radius: 24px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 15px;
+        color: #000000;
+        margin: 3px 0;
+        width: 100%;
+    }
+
+    .option-button:hover {
+        background: #8fc5d6;
+        transform: scale(1.02);
+    }
+
+    .option-button.selected {
+        background: #6db3ca;
+        font-weight: 600;
+        color: #0f3542;
+    }
+
+    .input-field {
+        font-family: 'Andale Mono', monospace;
+        width: 100%;
+        padding: 14px 18px;
+        border: 2px solid var(--earth-border);
+        border-radius: 16px;
+        font-size: 14.5px;
+        transition: all 0.3s ease;
+        margin: 10px 0;
+        background: white;
+    }
+
+    .input-field:focus {
+        outline: none;
+        border-color: var(--earth-primary);
+        box-shadow: 0 0 0 4px rgba(102, 187, 106, 0.15);
+    }
+
+    .input-field::placeholder {
+        color: #999;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    footer {
+        text-align: center;
+        padding: 20px 15px;
+        font-size: 10.5px;
+        color: #666;
+    }
+
+    footer a {
+        color: var(--earth-primary);
+        text-decoration: none;
+        transition: color 0.3s;
+        font-weight: 500;
+    }
+
+    footer a:hover {
+        color: var(--earth-text);
+        text-decoration: underline;
+    }
+
+    .results-box {
+        background: #e8e8e8;
+        border: none;
+        border-radius: 24px;
+        border-bottom-left-radius: 6px;
+        padding: 18px 20px;
+        margin: 4px 0;
+        animation: slideIn 0.5s ease-out;
+        max-width: 80%;
+        align-self: flex-start;
+        font-size: 15px;
+        font-weight: 500;
+        font-family: 'Courier New', Courier, monospace;
+        line-height: 1.4;
+        color: #000000;
+    }
+
+    .results-box strong {
+        color: #000000;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    @media screen and (max-width: 500px) {
+        body {
+            padding: 0;
+        }
+
+        .phone-screen {
+            width: 100vw;
+            height: 100vh;
+            border-radius: 0;
+            box-shadow: none;
+            max-width: none;
+        }
+
+        .header {
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+    }
+</style>
+<body>
+    <div class="container">
+        <div class="phone-screen">
+            <div class="header" id="header" title="Refresh">Earth</div>
+            
+            <div class="content start-page" id="start-page">
+                <div style="text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; margin-top: -80px;">
+                    <img src="earth-profilepic.png" alt="Earth Profile" style="width: 120px; height: 120px; border-radius: 50%; margin-bottom: 30px; object-fit: cover; border: 4px solid var(--earth-primary);">
+                    
+                    <div class="subtitle">Explore how analogies help us understand carbon metrics</div>
+                    <button class="button primary" id="open-btn">Enter Chat</button>
+                </div>
+            </div>
+
+            <div class="content hidden" id="chat-page">
+                <div class="chat-area" id="chat-area"></div>
+                <div id="options-container" class="options-container"></div>
+                <div id="input-container"></div>
+            </div>
+        </div>
+        
+        <footer>
+            <a href="https://github.com/naoyui/Earth/blob/main/README.md" target="_blank" style="color: var(--earth-primary); text-decoration: none; font-weight: bold; font-size: 12px;">READ ME</a>
+        </footer>
+    </div>
+
+    <script>
+        // Google Sheets Integration
+        const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwzgG6AgPMs0gOGo-sPRLDdevrSvx3783t__M84VUJ6P4O6iisoXj1-iRwzGStNmAPJ/exec';
+        
+        // Feedback Form
+        const FEEDBACK_URL = 'https://forms.gle/T9N3x7Rjb5iwtfLRA';
+        
+        // Function to submit data to Google Sheets
+        async function submitToGoogleSheets(data) {
+            if (!surveyData.consent || surveyData.consent === "No, I prefer not to") {
+                return; // Don't submit if user didn't consent
+            }
+            
+            try {
+                const response = await fetch(GOOGLE_SHEETS_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                console.log('Data submitted to Google Sheets');
+            } catch (error) {
+                console.error('Error submitting to Google Sheets:', error);
+            }
+        }
+
+        // Data storage
+        let surveyData = {
+            consent: null,
+            carbonMetric: null,
+            source: null,
+            initialUnderstanding: null,
+            physicalSize: null,
+            quantity: null,
+            weight: null,
+            severity: null
+        };
+
+        // DOM elements
+        const startPage = document.getElementById('start-page');
+        const chatPage = document.getElementById('chat-page');
+        const chatArea = document.getElementById('chat-area');
+        const optionsContainer = document.getElementById('options-container');
+        const inputContainer = document.getElementById('input-container');
+        const openBtn = document.getElementById('open-btn');
+        const header = document.getElementById('header');
+
+        // Audio elements for sound effects
+        const sendSound = new Audio('sent-ping.mp3');
+        const receiveSound = new Audio('received-ping.mp3');
+        
+        // Function to play send sound
+        function playSendSound() {
+            sendSound.currentTime = 0;
+            sendSound.play().catch(e => console.log('Audio play failed:', e));
+        }
+        
+        // Function to play receive sound
+        function playReceiveSound() {
+            receiveSound.currentTime = 0;
+            receiveSound.play().catch(e => console.log('Audio play failed:', e));
+        }
+
+        // Helper functions
+        function addMessage(text, type = 'bot') {
+            const message = document.createElement('div');
+            message.className = `message ${type}`;
+            message.innerHTML = text;
+            chatArea.appendChild(message);
+            
+            // Play appropriate sound effect
+            if (type === 'user') {
+                playSendSound();
+            } else {
+                playReceiveSound();
+            }
+            
+            // Smooth scroll to keep messages visible
+            setTimeout(() => {
+                message.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }, 100);
+        }
+
+        function showTypingIndicator() {
+            const typing = document.createElement('div');
+            typing.className = 'typing-indicator';
+            typing.innerHTML = '<span></span><span></span><span></span>';
+            typing.id = 'typing-indicator';
+            chatArea.appendChild(typing);
+            setTimeout(() => {
+                typing.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }, 100);
+        }
+
+        function hideTypingIndicator() {
+            const typing = document.getElementById('typing-indicator');
+            if (typing) typing.remove();
+        }
+
+        async function sendBotMessages(messages, delayBefore = 1000) {
+            await new Promise(resolve => setTimeout(resolve, delayBefore));
+            
+            for (let i = 0; i < messages.length; i++) {
+                showTypingIndicator();
+                
+                // Calculate delay based on message length
+                const messageLength = messages[i].replace(/<[^>]*>/g, '').length; // Remove HTML tags for accurate length
+                const baseDelay = 1200;
+                const additionalDelay = Math.min(messageLength * 15, 2000); // Max 2 seconds additional
+                const totalDelay = baseDelay + additionalDelay;
+                
+                await new Promise(resolve => setTimeout(resolve, totalDelay));
+                hideTypingIndicator();
+                addMessage(messages[i], 'bot');
+                
+                if (i < messages.length - 1) {
+                    // Add more gap between messages if current message is lengthy (>50 chars)
+                    const gapDelay = messageLength > 50 ? 1400 : 800;
+                    await new Promise(resolve => setTimeout(resolve, gapDelay));
+                }
+            }
+        }
+
+        function showOptions(options, onSelect) {
+            optionsContainer.innerHTML = '';
+            inputContainer.innerHTML = '';
+            
+            options.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-button';
+                btn.textContent = option;
+                btn.onclick = async () => {
+                    btn.classList.add('selected');
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    optionsContainer.innerHTML = '';
+                    addMessage(option, 'user');
+                    onSelect(option, index);
+                };
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function showInput(placeholder, onSubmit, inputType = 'text') {
+            optionsContainer.innerHTML = '';
+            
+            inputContainer.innerHTML = `
+                <input type="${inputType}" class="input-field" id="user-input" 
+                       placeholder="${placeholder}">
+                <button class="button primary" id="submit-btn">Submit</button>
+            `;
+            
+            const submitBtn = document.getElementById('submit-btn');
+            const inputField = document.getElementById('user-input');
+            
+            const handleSubmit = () => {
+                const value = inputField.value.trim();
+                if (!value) {
+                    inputField.style.borderColor = '#f44336';
+                    inputField.placeholder = 'Please enter a valid response';
+                    setTimeout(() => { 
+                        inputField.style.borderColor = ''; 
+                        inputField.placeholder = placeholder;
+                    }, 1000);
+                    return;
+                }
+                addMessage(value, 'user');
+                inputContainer.innerHTML = '';
+                onSubmit(value);
+            };
+            
+            submitBtn.onclick = handleSubmit;
+            inputField.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleSubmit();
+            });
+            
+            setTimeout(() => inputField.focus(), 100);
+        }
+
+        // Calculation functions
+        function calculatePhysicalSize(co2Tonnes, option) {
+            const tvYears = (co2Tonnes * 1000000) / 196000000;
+            const volume = co2Tonnes * 1.56; // m³
+            const courtLength = 28; // meters
+            const courtExtension = volume / (courtLength * 15);
+            const steps = (courtLength * courtExtension * 2) / 0.75;
+            const earthLandArea = 148940000; // km²
+            const footballFieldArea = 0.0071; // km²
+            const fieldsNeeded = (volume / 0.01) / 1000000 / footballFieldArea;
+            const percentOfEarth = (fieldsNeeded * footballFieldArea / earthLandArea) * 100;
+
+            // Balcony size description with multiplier for very large volumes
+            let balconyDescription = '';
+            if (volume < 0.001) {
+                balconyDescription = '<strong>a tennis ball</strong>';
+            } else if (volume < 1) {
+                balconyDescription = '<strong>a bathtub</strong>';
+            } else if (volume < 75) {
+                balconyDescription = '<strong>an apartment</strong>';
+            } else if (volume < 1000) {
+                balconyDescription = '<strong>a supermarket</strong>';
+            } else if (volume < 50000) {
+                balconyDescription = '<strong>a university campus</strong>';
+            } else {
+                // Calculate how many times a university campus (50,000 m³)
+                const campusMultiplier = (volume / 50000).toFixed(1);
+                balconyDescription = `<strong>${campusMultiplier} university campuses</strong>`;
+            }
+
+            const responses = {
+                'TV screens': `Approximately 196 million TVs are produced worldwide each year. This amount of carbon would take <strong>${tvYears.toFixed(2)} years</strong> of global TV production to physically represent.`,
+                'Balcony area': `If you converted this carbon into physical volume, it would cover a balcony the size of ${balconyDescription}.`,
+                'Basketball court': `If you stretched a basketball court <strong>${courtExtension.toFixed(1)} times</strong> its length and placed hoops only at the ends, a player would need to walk <strong>${Math.round(steps)} steps</strong> to reach the basket.`,
+                'Football fields': `This would cover <strong>${percentOfEarth.toFixed(6)}%</strong> of Earth's land surface in back-to-back football fields, totaling approximately <strong>${Math.round(fieldsNeeded).toLocaleString()} fields</strong>.`
+            };
+
+            return responses[option];
+        }
+
+        function calculateQuantity(co2Tonnes, option) {
+            const co2Kg = co2Tonnes * 1000;
+            const coffeePerDay = 5;
+            const coffeeCupCO2 = 0.021; // kg per cup
+            const totalCups = co2Kg / coffeeCupCO2;
+            const days = totalCups / coffeePerDay;
+            const smartphoneCO2 = 0.08; // kg per phone
+            const smartphones = co2Kg / smartphoneCO2;
+            const bottleCO2 = 0.5; // kg per 2L bottle
+            const bottles = co2Kg / bottleCO2;
+            const partiesNeeded = bottles / 10; // assuming 10 bottles per party
+            const milkyWayStars = 250000000000; // average
+            const galaxyMultiplier = co2Kg / milkyWayStars;
+
+            const responses = {
+                'Coffee cups': `Adults safely consume 4-5 cups of coffee daily. It would take you <strong>${Math.round(days).toLocaleString()} days</strong> to finish <strong>${Math.round(totalCups).toLocaleString()} cups</strong>.`,
+                'Smartphones': `Imagine carrying <strong>${Math.round(smartphones).toLocaleString()} smartphones</strong> with you every time you leave the house—that's the quantity we're talking about.`,
+                '2-liter bottles': `A 2-liter bottle typically empties quickly at a gathering. You'd need to host <strong>${Math.round(partiesNeeded).toLocaleString()} small parties</strong> to go through <strong>${Math.round(bottles).toLocaleString()} bottles</strong>.`,
+                'Stars': `The Milky Way contains 100-400 billion stars. This carbon count equals our entire galaxy multiplied by <strong>${galaxyMultiplier.toFixed(8)}</strong>.`
+            };
+
+            return responses[option];
+        }
+
+        function calculateWeight(co2Tonnes, option) {
+            const co2Kg = co2Tonnes * 1000;
+            const adultWeight = 70; // kg
+            const coinWeight = 0.0056; // kg
+            const suitcaseWeight = 23; // kg
+            const carWeight = 1500; // kg
+            const captainAmericaLift = 450; // kg
+
+            const responses = {
+                'Coins': `Imagine tossing and catching a single coin—now picture tossing <strong>${Math.round(co2Kg / coinWeight).toLocaleString()} coins</strong> in the air simultaneously.`,
+                'Suitcases': `Packing for a trip is challenging enough, but imagine packing and transporting <strong>${Math.round(co2Kg / suitcaseWeight).toLocaleString()} suitcases</strong> to the station.`,
+                'People': `This weight equals carrying <strong>${Math.round(co2Kg / adultWeight).toLocaleString()} adults</strong> simultaneously.`,
+                'Cars': `Captain America can lift approximately 450 kg. You'd need <strong>${Math.round((co2Kg / carWeight) * (carWeight / captainAmericaLift)).toLocaleString()} Captain Americas</strong> to lift <strong>${Math.round(co2Kg / carWeight).toLocaleString()} cars</strong>, weighing a combined <strong>${co2Kg.toLocaleString()} kg</strong>.`
+            };
+
+            return responses[option];
+        }
+
+        function calculateSeverity(co2Tonnes, option) {
+            const co2Kg = co2Tonnes * 1000;
+            const co2Gt = co2Tonnes / 1000000; // Convert to gigatonnes (Gt)
+            const treeAbsorption = 22; // kg per year
+            const trees = co2Kg / treeAbsorption;
+            const weeklyAddition = co2Kg;
+            const totalBudget = 500000000000; // kg remaining for 1.5°C
+            const weeksToThreshold = totalBudget / weeklyAddition;
+            const daysToThreshold = weeksToThreshold * 7;
+
+            // Calculate systemic impacts based on CO2 amount
+            // Every 1,000 Gt CO2 ≈ +0.5-0.7°C warming + 1.5-2m sea level rise + 0.05 pH drop
+            const warmingLow = (co2Gt / 1000) * 0.5;
+            const warmingHigh = (co2Gt / 1000) * 0.7;
+            const seaLevelLow = (co2Gt / 1000) * 1.5;
+            const seaLevelHigh = (co2Gt / 1000) * 2.0;
+            const pHDrop = (co2Gt / 1000) * 0.05;
+
+            let systemicImpactText = '';
+            if (co2Gt < 1) {
+                // Very small amounts
+                systemicImpactText = 'While this seems like a small amount, every bit of CO₂ contributes to cumulative atmospheric changes. These emissions add to the larger carbon cycle, affecting climate patterns, ocean chemistry, and ecosystems over time.';
+            } else if (co2Gt < 100) {
+                // Small to medium amounts
+                systemicImpactText = `This amount of CO₂ contributes to approximately <strong>${warmingLow.toFixed(3)}-${warmingHigh.toFixed(3)}°C</strong> of long-term warming, <strong>${(seaLevelLow * 100).toFixed(1)}-${(seaLevelHigh * 100).toFixed(1)} cm</strong> of eventual sea level rise, and a <strong>${pHDrop.toFixed(4)} pH drop</strong> in ocean acidity. These changes create cascading effects across weather patterns, agricultural systems, and marine ecosystems.`;
+            } else if (co2Gt < 1000) {
+                // Medium to large amounts
+                systemicImpactText = `This level of CO₂ drives approximately <strong>${warmingLow.toFixed(2)}-${warmingHigh.toFixed(2)}°C</strong> of global warming, <strong>${seaLevelLow.toFixed(1)}-${seaLevelHigh.toFixed(1)} meters</strong> of long-term sea level rise, and a <strong>${pHDrop.toFixed(3)} pH drop</strong> in oceans. This triggers disruptions in agriculture, water resources, coastal infrastructure, supply chains, and human migration—each amplifying the others in a feedback loop.`;
+            } else {
+                // Very large amounts (geological scale)
+                systemicImpactText = `At this massive scale (${co2Gt.toLocaleString()} Gt), CO₂ would cause approximately <strong>${warmingLow.toFixed(1)}-${warmingHigh.toFixed(1)}°C</strong> of warming, <strong>${seaLevelLow.toFixed(0)}-${seaLevelHigh.toFixed(0)} meters</strong> of sea level rise over centuries to millennia, and a <strong>${pHDrop.toFixed(2)} pH drop</strong> in oceans. This represents a fundamental restructuring of Earth's climate system, comparable to major geological transitions in our planet's history.`;
+            }
+
+            // Historical CO2 levels (using actual atmospheric data)
+            // Conversion: 1 ppm = 7.8 Gt CO2
+            let historicalContext = '';
+            if (co2Gt >= 936000) {
+                historicalContext = '<strong>635 million years ago</strong>, at the end of Snowball Earth, when the entire planet was frozen';
+            } else if (co2Gt >= 780000) {
+                historicalContext = '<strong>the early Earth</strong>, billions of years ago, when the atmosphere was vastly different from today';
+            } else if (co2Gt >= 31200) {
+                historicalContext = '<strong>500 million years ago</strong>, during the Cambrian period, when complex life was just beginning to evolve';
+            } else if (co2Gt >= 18720) {
+                historicalContext = '<strong>400 million years ago</strong>, during the Devonian period, long before dinosaurs existed';
+            } else if (co2Gt >= 12480) {
+                historicalContext = '<strong>400 million years ago</strong>, in the mid-Devonian period, when the first forests were forming';
+            } else if (co2Gt >= 5928) {
+                historicalContext = '<strong>34 million years ago</strong>, when Antarctic ice sheets first began to form';
+            } else if (co2Gt >= 4680) {
+                historicalContext = '<strong>5-7 million years ago</strong>, during the late Miocene epoch, before modern humans existed';
+            } else if (co2Gt >= 3276) {
+                historicalContext = '<strong>3-3.3 million years ago</strong>, during the mid-Pliocene epoch, when temperatures were 2-3°C warmer than today';
+            } else if (co2Gt >= 3120) {
+                historicalContext = '<strong>3 million years ago</strong>, during the Pliocene, when sea levels were 15-25 meters higher than today';
+            } else if (co2Gt >= 3019) {
+                historicalContext = '<strong>2009</strong>, when atmospheric CO2 levels crossed a significant milestone in modern times';
+            } else if (co2Gt >= 2340) {
+                historicalContext = '<strong>7,000-10,000 years ago</strong>, during the early Holocene warm period after the last ice age';
+            } else if (co2Gt >= 2184) {
+                historicalContext = '<strong>pre-industrial times (before 1750)</strong>, when human activity had minimal impact on the atmosphere';
+            } else if (co2Gt >= 1638) {
+                historicalContext = '<strong>interglacial warm periods</strong> over the last 800,000 years, between ice ages';
+            } else if (co2Gt >= 1404) {
+                historicalContext = '<strong>20,000 years ago</strong>, during the Last Ice Age, when ice sheets covered much of North America and Europe';
+            } else {
+                historicalContext = '<strong>deep ice age periods</strong> in Earth\'s distant past, when the planet was significantly colder';
+            }
+
+            const responses = {
+                'Natural solutions': `A mature tree absorbs approximately 22 kg of CO₂ per year. We would need <strong>${Math.round(trees).toLocaleString()} trees</strong> to absorb this amount of carbon.`,
+                'Timeline to climate threshold': `If this amount were added weekly, we could cross the 1.5°C temperature threshold in approximately <strong>${Math.round(daysToThreshold).toLocaleString()} days</strong>.`,
+                'Historical context': `The last time Earth's atmosphere contained this much carbon was ${historicalContext}.`,
+                'Systemic impacts': systemicImpactText
+            };
+
+            return responses[option];
+        }
+
+        // Question flow
+        async function startQuestionnaire() {
+            startPage.classList.add('hidden');
+            chatPage.classList.remove('hidden');
+
+            await sendBotMessages(["Numbers like \"2,500 tons of CO2 emissions\" can be hard to picture. This tool translates them into things you can actually visualize."], 0);
+            await sendBotMessages(["We'll ask a few questions about how you think about scale and quantity. The context will become clear as we go."]);
+            await sendBotMessages(["Before we start, may we record your responses for research purposes?"]);
+            
+            showOptions(["Yes, I consent", "No, I prefer not to"], async (choice) => {
+                surveyData.consent = choice;
+                await sendBotMessages(["Let's begin."]);
+                await askCarbonMetric();
+            });
+        }
+
+        async function askCarbonMetric() {
+            await sendBotMessages(["Enter a number in tons of CO₂e:"]);
+            
+            showInput("Enter amount (e.g., 2500)", async (value) => {
+                surveyData.carbonMetric = value;
+                // Extract number from input
+                const match = value.match(/(\d+(?:\.\d+)?)/);
+                surveyData.carbonNumber = match ? parseFloat(match[1]) : 2500;
+                await askSource();
+            }, 'number');
+        }
+
+        async function askSource() {
+            await sendBotMessages(["Where did you see this number?"]);
+            
+            showOptions([
+                "News article",
+                "Corporate sustainability report",
+                "Government report",
+                "Academic paper",
+                "Social media",
+                "Other"
+            ], async (choice) => {
+                surveyData.source = choice;
+                await askInitialUnderstanding();
+            });
+        }
+
+        async function askInitialUnderstanding() {
+            await sendBotMessages(["When you first saw this number, did you immediately understand its magnitude?"]);
+            
+            showOptions([
+                "Yes, completely",
+                "Somewhat",
+                "Not really",
+                "Not at all"
+            ], async (choice) => {
+                surveyData.initialUnderstanding = choice;
+                await askPhysicalSize();
+            });
+        }
+
+        async function askPhysicalSize() {
+            await sendBotMessages(["Which comparison helps you picture the physical size?"]);
+            
+            showOptions([
+                "TV screens",
+                "Balcony area",
+                "Basketball court",
+                "Football fields"
+            ], async (choice) => {
+                surveyData.physicalSize = choice;
+                
+                // Show typing indicator before showing answer
+                showTypingIndicator();
+                
+                // Calculate the result
+                const co2Value = surveyData.carbonNumber;
+                const sizeResult = calculatePhysicalSize(co2Value, surveyData.physicalSize);
+                
+                // Longer delay for calculated results (based on length)
+                const messageLength = sizeResult.replace(/<[^>]*>/g, '').length;
+                const baseDelay = 2000; // Start with 2 seconds
+                const additionalDelay = Math.min(messageLength * 20, 3000); // Up to 3 seconds more
+                const totalDelay = baseDelay + additionalDelay;
+                
+                await new Promise(resolve => setTimeout(resolve, totalDelay));
+                hideTypingIndicator();
+                
+                // Show the result
+                const sizeBox = `<div class="results-box">${sizeResult}</div>`;
+                const sizeMsg = document.createElement('div');
+                sizeMsg.innerHTML = sizeBox;
+                chatArea.appendChild(sizeMsg.firstChild);
+                setTimeout(() => {
+                    sizeMsg.firstChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }, 100);
+                
+                // Add extra pause after result before next question
+                await new Promise(resolve => setTimeout(resolve, 1200));
+                
+                await askQuantity();
+            });
+        }
+
+        async function askQuantity() {
+            await sendBotMessages(["Which everyday object helps you understand the quantity?"]);
+            
+            showOptions([
+                "Coffee cups",
+                "Smartphones",
+                "2-liter bottles",
+                "Stars"
+            ], async (choice) => {
+                surveyData.quantity = choice;
+                
+                // Show typing indicator before showing answer
+                showTypingIndicator();
+                
+                // Calculate the result
+                const co2Value = surveyData.carbonNumber;
+                const quantityResult = calculateQuantity(co2Value, surveyData.quantity);
+                
+                // Longer delay for calculated results
+                const messageLength = quantityResult.replace(/<[^>]*>/g, '').length;
+                const baseDelay = 2000;
+                const additionalDelay = Math.min(messageLength * 20, 3000);
+                const totalDelay = baseDelay + additionalDelay;
+                
+                await new Promise(resolve => setTimeout(resolve, totalDelay));
+                hideTypingIndicator();
+                
+                // Show the result
+                const quantityBox = `<div class="results-box">${quantityResult}</div>`;
+                const quantityMsg = document.createElement('div');
+                quantityMsg.innerHTML = quantityBox;
+                chatArea.appendChild(quantityMsg.firstChild);
+                setTimeout(() => {
+                    quantityMsg.firstChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }, 100);
+                
+                // Add extra pause after result
+                await new Promise(resolve => setTimeout(resolve, 1200));
+                
+                await askWeight();
+            });
+        }
+
+        async function askWeight() {
+            await sendBotMessages(["Which comparison helps you feel the weight?"]);
+            
+            showOptions([
+                "Coins",
+                "Suitcases",
+                "People",
+                "Cars"
+            ], async (choice) => {
+                surveyData.weight = choice;
+                
+                // Show typing indicator before showing answer
+                showTypingIndicator();
+                
+                // Calculate the result
+                const co2Value = surveyData.carbonNumber;
+                const weightResult = calculateWeight(co2Value, surveyData.weight);
+                
+                // Longer delay for calculated results
+                const messageLength = weightResult.replace(/<[^>]*>/g, '').length;
+                const baseDelay = 2000;
+                const additionalDelay = Math.min(messageLength * 20, 3000);
+                const totalDelay = baseDelay + additionalDelay;
+                
+                await new Promise(resolve => setTimeout(resolve, totalDelay));
+                hideTypingIndicator();
+                
+                // Show the result
+                const weightBox = `<div class="results-box">${weightResult}</div>`;
+                const weightMsg = document.createElement('div');
+                weightMsg.innerHTML = weightBox;
+                chatArea.appendChild(weightMsg.firstChild);
+                setTimeout(() => {
+                    weightMsg.firstChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }, 100);
+                
+                // Add extra pause after result
+                await new Promise(resolve => setTimeout(resolve, 1200));
+                
+                await askSeverity();
+            });
+        }
+
+        async function askSeverity() {
+            await sendBotMessages(["How would you like to understand the environmental impact?"]);
+            
+            showOptions([
+                "Natural solutions",
+                "Timeline to climate threshold",
+                "Historical context",
+                "Systemic impacts"
+            ], async (choice) => {
+                surveyData.severity = choice;
+                
+                // Show typing indicator before showing answer
+                showTypingIndicator();
+                
+                // Calculate the result
+                const co2Value = surveyData.carbonNumber;
+                const severityResult = calculateSeverity(co2Value, surveyData.severity);
+                
+                // Longer delay for calculated results
+                const messageLength = severityResult.replace(/<[^>]*>/g, '').length;
+                const baseDelay = 2000;
+                const additionalDelay = Math.min(messageLength * 20, 3000);
+                const totalDelay = baseDelay + additionalDelay;
+                
+                await new Promise(resolve => setTimeout(resolve, totalDelay));
+                hideTypingIndicator();
+                
+                // Show the result
+                const severityBox = `<div class="results-box">${severityResult}</div>`;
+                const severityMsg = document.createElement('div');
+                severityMsg.innerHTML = severityBox;
+                chatArea.appendChild(severityMsg.firstChild);
+                setTimeout(() => {
+                    severityMsg.firstChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                }, 100);
+                
+                // Add extra pause after result
+                await new Promise(resolve => setTimeout(resolve, 1200));
+                
+                await showResults();
+            });
+        }
+
+        async function showResults() {
+            // Prepare data for Google Sheets
+            const timestamp = new Date().toISOString();
+            const responseData = {
+                timestamp: timestamp,
+                consent: surveyData.consent,
+                carbonMetric: surveyData.carbonMetric,
+                carbonNumber: surveyData.carbonNumber,
+                source: surveyData.source,
+                initialUnderstanding: surveyData.initialUnderstanding,
+                physicalSize: surveyData.physicalSize,
+                quantity: surveyData.quantity,
+                weight: surveyData.weight,
+                severity: surveyData.severity
+            };
+            
+            // Submit to Google Sheets if user consented
+            await submitToGoogleSheets(responseData);
+            
+            await sendBotMessages(["Thank you for participating. Remember: this tool aids understanding but doesn't replace actual climate science. Keep learning."]);
+            await sendBotMessages(["Share feedback using the link below"]);
+
+            // Show feedback button
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            optionsContainer.innerHTML = '';
+            const feedbackBtn = document.createElement('button');
+            feedbackBtn.className = 'button primary';
+            feedbackBtn.textContent = 'Feedback';
+            feedbackBtn.onclick = () => {
+                window.open(FEEDBACK_URL, '_blank');
+            };
+            optionsContainer.appendChild(feedbackBtn);
+        }
+
+        // Event listeners
+        openBtn.addEventListener('click', startQuestionnaire);
+        header.addEventListener('click', () => { 
+            if (confirm('Refresh and start over?')) location.reload(); 
+        });
+    </script>
+</body>
+</html>
