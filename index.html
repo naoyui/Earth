@@ -620,14 +620,15 @@
         // Calculation functions
         function calculatePhysicalSize(co2Tonnes, option) {
             const tvYears = (co2Tonnes * 1000000) / 196000000;
-            const volume = co2Tonnes * 1.56; // m³
+            const volume = co2Tonnes / 1.56; // m³ - CORRECTED: Volume = Mass / Density (1000kg / 1560kg/m³ = 0.64m³ per tonne)
             const courtLength = 28; // meters
             const courtExtension = volume / (courtLength * 15);
             const steps = (courtLength * courtExtension * 2) / 0.75;
             const earthLandArea = 148940000; // km²
-            const footballFieldArea = 0.0071; // km²
-            const fieldsNeeded = (volume / 0.01) / 1000000 / footballFieldArea;
-            const percentOfEarth = (fieldsNeeded * footballFieldArea / earthLandArea) * 100;
+            const footballFieldArea = 7140; // m² (105m x 68m) - CORRECTED from km²
+            const areaM2 = volume / 0.01; // Spread 1cm thick
+            const fieldsNeeded = areaM2 / footballFieldArea;
+            const percentOfEarth = (fieldsNeeded * footballFieldArea / 1000000) / earthLandArea * 100; // Convert m² to km²
 
             // Balcony size description with multiplier for very large volumes
             let balconyDescription = '';
@@ -663,7 +664,7 @@
             const coffeeCupCO2 = 0.021; // kg per cup
             const totalCups = co2Kg / coffeeCupCO2;
             const days = totalCups / coffeePerDay;
-            const smartphoneCO2 = 0.08; // kg per phone
+            const smartphoneCO2 = 80; // kg per phone (corrected from 0.08)
             const smartphones = co2Kg / smartphoneCO2;
             const bottleCO2 = 0.5; // kg per 2L bottle
             const bottles = co2Kg / bottleCO2;
@@ -701,76 +702,93 @@
 
         function calculateSeverity(co2Tonnes, option) {
             const co2Kg = co2Tonnes * 1000;
-            const co2Gt = co2Tonnes / 1000000; // Convert to gigatonnes (Gt)
+            const co2Gt = co2Tonnes / 1000000000; // Convert to gigatonnes (Gt) - CORRECT: 1 Gt = 1 billion tonnes
             const treeAbsorption = 22; // kg per year
             const trees = co2Kg / treeAbsorption;
-            const weeklyAddition = co2Kg;
-            const totalBudget = 500000000000; // kg remaining for 1.5°C
-            const weeksToThreshold = totalBudget / weeklyAddition;
+            
+            // Timeline to climate threshold - CORRECTED
+            const weeklyAdditionGt = co2Gt; // User's input as weekly addition in Gt
+            const totalBudgetGt = 500; // 500 Gt remaining for 1.5°C
+            const weeksToThreshold = totalBudgetGt / weeklyAdditionGt;
             const daysToThreshold = weeksToThreshold * 7;
 
-            // Calculate systemic impacts based on CO2 amount
-            // Every 1,000 Gt CO2 ≈ +0.5-0.7°C warming + 1.5-2m sea level rise + 0.05 pH drop
-            const warmingLow = (co2Gt / 1000) * 0.5;
-            const warmingHigh = (co2Gt / 1000) * 0.7;
-            const seaLevelLow = (co2Gt / 1000) * 1.5;
-            const seaLevelHigh = (co2Gt / 1000) * 2.0;
-            const pHDrop = (co2Gt / 1000) * 0.05;
+            // Calculate systemic impacts using TCRE (Transient Climate Response to Cumulative Emissions)
+            // TCRE ≈ 0.45°C per 1,000 Gt CO₂
+            const warmingPerThousandGt = 0.45; // °C
+            const warming = (co2Gt / 1000) * warmingPerThousandGt;
+            
+            // Sea level rise: approximately 2 meters per °C of warming (long-term)
+            const seaLevelRise = warming * 2.0; // meters
+            
+            // Ocean acidification: pH drop of ~0.1 per 1,000 Gt CO₂
+            const pHDrop = (co2Gt / 1000) * 0.1;
 
             let systemicImpactText = '';
-            if (co2Gt < 1) {
-                // Very small amounts
-                systemicImpactText = 'While this seems like a small amount, every bit of CO₂ contributes to cumulative atmospheric changes. These emissions add to the larger carbon cycle, affecting climate patterns, ocean chemistry, and ecosystems over time.';
-            } else if (co2Gt < 100) {
-                // Small to medium amounts
-                systemicImpactText = `This amount of CO₂ contributes to approximately <strong>${warmingLow.toFixed(3)}-${warmingHigh.toFixed(3)}°C</strong> of long-term warming, <strong>${(seaLevelLow * 100).toFixed(1)}-${(seaLevelHigh * 100).toFixed(1)} cm</strong> of eventual sea level rise, and a <strong>${pHDrop.toFixed(4)} pH drop</strong> in ocean acidity. These changes create cascading effects across weather patterns, agricultural systems, and marine ecosystems.`;
+            if (co2Gt < 0.000001) {
+                // Very small amounts (less than 1,000 tonnes)
+                systemicImpactText = `While this amount (${co2Tonnes.toLocaleString()} tonnes) seems small individually, every emission contributes to the cumulative atmospheric burden. At current global emission rates of ~40 billion tonnes/year, emissions of this scale accumulate rapidly, affecting climate patterns, ocean chemistry, and ecosystems over time.`;
+            } else if (co2Gt < 0.001) {
+                // Small amounts (1,000 to 1 million tonnes)
+                const warmingMicroDegrees = warming * 1000000; // Convert to millionths of a degree
+                const seaLevelMicrons = seaLevelRise * 1000000000; // Convert to nanometers for display
+                systemicImpactText = `This amount (${co2Tonnes.toLocaleString()} tonnes = ${co2Gt.toFixed(6)} Gt) contributes approximately <strong>${warmingMicroDegrees.toFixed(3)} millionths of a degree</strong> to global warming. While individually tiny, such emissions accumulate: if sustained globally at current rates, they drive measurable changes in weather patterns, agricultural yields, and sea levels over decades.`;
+            } else if (co2Gt < 1) {
+                // Medium amounts (1 million to 1 billion tonnes)
+                const warmingMilliDegrees = warming * 1000; // Convert to thousandths
+                const seaLevelMM = seaLevelRise * 1000; // Convert to millimeters
+                systemicImpactText = `This level (${co2Tonnes.toLocaleString()} tonnes = ${co2Gt.toFixed(3)} Gt) drives approximately <strong>${warmingMilliDegrees.toFixed(4)} thousandths of a degree</strong> (${(warmingMilliDegrees/1000).toFixed(6)}°C) of warming and <strong>${seaLevelMM.toFixed(4)} mm</strong> of eventual sea level rise. A <strong>${pHDrop.toFixed(6)} pH drop</strong> in oceans. At this scale, repeated emissions create cascading disruptions in regional agriculture, water resources, and coastal infrastructure.`;
             } else if (co2Gt < 1000) {
-                // Medium to large amounts
-                systemicImpactText = `This level of CO₂ drives approximately <strong>${warmingLow.toFixed(2)}-${warmingHigh.toFixed(2)}°C</strong> of global warming, <strong>${seaLevelLow.toFixed(1)}-${seaLevelHigh.toFixed(1)} meters</strong> of long-term sea level rise, and a <strong>${pHDrop.toFixed(3)} pH drop</strong> in oceans. This triggers disruptions in agriculture, water resources, coastal infrastructure, supply chains, and human migration—each amplifying the others in a feedback loop.`;
+                // Large amounts (1 to 1,000 billion tonnes)
+                systemicImpactText = `This level (${co2Tonnes.toLocaleString()} tonnes = ${co2Gt.toFixed(2)} Gt) drives approximately <strong>${warming.toFixed(4)}°C</strong> of global warming, <strong>${seaLevelRise.toFixed(4)} meters</strong> of long-term sea level rise, and a <strong>${pHDrop.toFixed(4)} pH drop</strong> in oceans. This triggers major disruptions in global agriculture, water resources, coastal cities, supply chains, and human migration—each amplifying the others in feedback loops.`;
             } else {
-                // Very large amounts (geological scale)
-                systemicImpactText = `At this massive scale (${co2Gt.toLocaleString()} Gt), CO₂ would cause approximately <strong>${warmingLow.toFixed(1)}-${warmingHigh.toFixed(1)}°C</strong> of warming, <strong>${seaLevelLow.toFixed(0)}-${seaLevelHigh.toFixed(0)} meters</strong> of sea level rise over centuries to millennia, and a <strong>${pHDrop.toFixed(2)} pH drop</strong> in oceans. This represents a fundamental restructuring of Earth's climate system, comparable to major geological transitions in our planet's history.`;
+                // Very large amounts (1,000+ billion tonnes = 1+ trillion tonnes)
+                systemicImpactText = `At this massive scale (${co2Tonnes.toLocaleString()} tonnes = ${co2Gt.toLocaleString()} Gt), CO₂ would cause approximately <strong>${warming.toFixed(1)}°C</strong> of warming, <strong>${seaLevelRise.toFixed(0)} meters</strong> of sea level rise over centuries, and a <strong>${pHDrop.toFixed(2)} pH drop</strong> in oceans. This represents a fundamental restructuring of Earth's climate system, comparable to major geological transitions in our planet's history.`;
             }
 
             // Historical CO2 levels (using actual atmospheric data)
             // Conversion: 1 ppm = 7.8 Gt CO2
             let historicalContext = '';
+            let historicalPeriod = '';
+            
             if (co2Gt >= 936000) {
-                historicalContext = '<strong>635 million years ago</strong>, at the end of Snowball Earth, when the entire planet was frozen';
+                historicalPeriod = '635 million years ago, at the end of Snowball Earth';
             } else if (co2Gt >= 780000) {
-                historicalContext = '<strong>the early Earth</strong>, billions of years ago, when the atmosphere was vastly different from today';
+                historicalPeriod = 'the early Earth, billions of years ago';
             } else if (co2Gt >= 31200) {
-                historicalContext = '<strong>500 million years ago</strong>, during the Cambrian period, when complex life was just beginning to evolve';
+                historicalPeriod = '500 million years ago, during the Cambrian period';
             } else if (co2Gt >= 18720) {
-                historicalContext = '<strong>400 million years ago</strong>, during the Devonian period, long before dinosaurs existed';
+                historicalPeriod = '400 million years ago, during the Devonian period';
             } else if (co2Gt >= 12480) {
-                historicalContext = '<strong>400 million years ago</strong>, in the mid-Devonian period, when the first forests were forming';
+                historicalPeriod = '400 million years ago, in the mid-Devonian period';
             } else if (co2Gt >= 5928) {
-                historicalContext = '<strong>34 million years ago</strong>, when Antarctic ice sheets first began to form';
+                historicalPeriod = '34 million years ago, when Antarctic ice sheets first began to form';
             } else if (co2Gt >= 4680) {
-                historicalContext = '<strong>5-7 million years ago</strong>, during the late Miocene epoch, before modern humans existed';
+                historicalPeriod = '5-7 million years ago, during the late Miocene epoch';
             } else if (co2Gt >= 3276) {
-                historicalContext = '<strong>3-3.3 million years ago</strong>, during the mid-Pliocene epoch, when temperatures were 2-3°C warmer than today';
+                historicalPeriod = '3-3.3 million years ago, during the mid-Pliocene epoch';
             } else if (co2Gt >= 3120) {
-                historicalContext = '<strong>3 million years ago</strong>, during the Pliocene, when sea levels were 15-25 meters higher than today';
+                historicalPeriod = '3 million years ago, during the Pliocene';
             } else if (co2Gt >= 3019) {
-                historicalContext = '<strong>2009</strong>, when atmospheric CO2 levels crossed a significant milestone in modern times';
+                historicalPeriod = '2009, when atmospheric CO2 crossed a significant milestone';
             } else if (co2Gt >= 2340) {
-                historicalContext = '<strong>7,000-10,000 years ago</strong>, during the early Holocene warm period after the last ice age';
+                historicalPeriod = '7,000-10,000 years ago, during the early Holocene';
             } else if (co2Gt >= 2184) {
-                historicalContext = '<strong>pre-industrial times (before 1750)</strong>, when human activity had minimal impact on the atmosphere';
+                historicalPeriod = 'pre-industrial times (before 1750)';
             } else if (co2Gt >= 1638) {
-                historicalContext = '<strong>interglacial warm periods</strong> over the last 800,000 years, between ice ages';
+                historicalPeriod = 'interglacial warm periods over the last 800,000 years';
             } else if (co2Gt >= 1404) {
-                historicalContext = '<strong>20,000 years ago</strong>, during the Last Ice Age, when ice sheets covered much of North America and Europe';
+                historicalPeriod = '20,000 years ago, during the Last Ice Age';
             } else {
-                historicalContext = '<strong>deep ice age periods</strong> in Earth\'s distant past, when the planet was significantly colder';
+                historicalPeriod = 'deep ice age periods';
             }
+            
+            // New historical context message
+            historicalContext = `In the deep history of Earth, <strong>${co2Gt.toExponential(2)} Gigatonnes</strong> is a microscopic fraction. It would take billions of inputs of this size to rival ${historicalPeriod}. However, unlike natural cycles, this carbon was released instantly and will linger in the atmosphere for centuries.`;
 
             const responses = {
                 'Natural solutions': `A mature tree absorbs approximately 22 kg of CO₂ per year. We would need <strong>${Math.round(trees).toLocaleString()} trees</strong> to absorb this amount of carbon.`,
                 'Timeline to climate threshold': `If this amount were added weekly, we could cross the 1.5°C temperature threshold in approximately <strong>${Math.round(daysToThreshold).toLocaleString()} days</strong>.`,
-                'Historical context': `The last time Earth's atmosphere contained this much carbon was ${historicalContext}.`,
+                'Historical context': historicalContext,
                 'Systemic impacts': systemicImpactText
             };
 
@@ -862,6 +880,9 @@
                 await new Promise(resolve => setTimeout(resolve, totalDelay));
                 hideTypingIndicator();
                 
+                // Play receive sound for calculated result
+                playReceiveSound();
+                
                 // Show the result
                 const sizeBox = `<div class="results-box">${sizeResult}</div>`;
                 const sizeMsg = document.createElement('div');
@@ -904,6 +925,9 @@
                 
                 await new Promise(resolve => setTimeout(resolve, totalDelay));
                 hideTypingIndicator();
+                
+                // Play receive sound for calculated result
+                playReceiveSound();
                 
                 // Show the result
                 const quantityBox = `<div class="results-box">${quantityResult}</div>`;
@@ -948,6 +972,9 @@
                 await new Promise(resolve => setTimeout(resolve, totalDelay));
                 hideTypingIndicator();
                 
+                // Play receive sound for calculated result
+                playReceiveSound();
+                
                 // Show the result
                 const weightBox = `<div class="results-box">${weightResult}</div>`;
                 const weightMsg = document.createElement('div');
@@ -991,6 +1018,9 @@
                 await new Promise(resolve => setTimeout(resolve, totalDelay));
                 hideTypingIndicator();
                 
+                // Play receive sound for calculated result
+                playReceiveSound();
+                
                 // Show the result
                 const severityBox = `<div class="results-box">${severityResult}</div>`;
                 const severityMsg = document.createElement('div');
@@ -1000,8 +1030,14 @@
                     severityMsg.firstChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
                 }, 100);
                 
-                // Add extra pause after result
-                await new Promise(resolve => setTimeout(resolve, 1200));
+                // Extra long pause for complex messages
+                let pauseDelay = 1200; // Default
+                if (choice === 'Systemic impacts') {
+                    pauseDelay = 2000; // 2 seconds for systemic impacts
+                } else if (choice === 'Historical context') {
+                    pauseDelay = 2000; // 2 seconds for historical context
+                }
+                await new Promise(resolve => setTimeout(resolve, pauseDelay));
                 
                 await showResults();
             });
@@ -1049,3 +1085,4 @@
     </script>
 </body>
 </html>
+
