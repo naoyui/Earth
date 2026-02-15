@@ -800,7 +800,7 @@
             startPage.classList.add('hidden');
             chatPage.classList.remove('hidden');
 
-            await sendBotMessages(["Numbers like \"2,500 tons of CO2 emissions\" can be hard to picture. This tool translates them into things you can actually visualize."], 0);
+            await sendBotMessages(["Numbers like \"2,500 tonnes of CO2 emissions\" can be hard to picture. This tool translates them into things you can actually visualize."], 0);
             await sendBotMessages(["We'll ask a few questions about how you think about scale and quantity. The context will become clear as we go."]);
             await sendBotMessages(["Before we start, may we record your responses for research purposes?"]);
             
@@ -812,7 +812,7 @@
         }
 
         async function askCarbonMetric() {
-            await sendBotMessages(["Enter a number in tons of CO₂e:"]);
+            await sendBotMessages(["Enter a number in tonnes of CO₂e:"]);
             
             showInput("Enter amount (e.g., 2500)", async (value) => {
                 surveyData.carbonMetric = value;
@@ -1085,4 +1085,5 @@
     </script>
 </body>
 </html>
+
 
