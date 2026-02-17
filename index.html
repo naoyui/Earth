@@ -59,6 +59,28 @@
         flex-direction: column;
     }
 
+    @media (max-width: 500px) {
+        body {
+            padding: 20px 16px;
+            align-items: center;
+        }
+        .phone-screen {
+            width: calc(100vw - 32px);
+            max-width: 375px;
+            height: 667px;
+        }
+    }
+
+    @media (max-height: 720px) and (max-width: 500px) {
+        body {
+            padding: 12px 16px;
+        }
+        .phone-screen {
+            height: calc(100vh - 24px);
+            height: calc(100dvh - 24px);
+        }
+    }
+
     .header {
         height: 50px;
         background: linear-gradient(135deg, var(--earth-primary) 0%, var(--earth-secondary) 100%);
@@ -438,16 +460,13 @@
     </div>
 
     <script>
-        // Google Sheets Integration
         const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwzgG6AgPMs0gOGo-sPRLDdevrSvx3783t__M84VUJ6P4O6iisoXj1-iRwzGStNmAPJ/exec';
         
-        // Feedback Form
         const FEEDBACK_URL = 'https://forms.gle/T9N3x7Rjb5iwtfLRA';
         
-        // Function to submit data to Google Sheets
         async function submitToGoogleSheets(data) {
             if (!surveyData.consent || surveyData.consent === "No, I prefer not to") {
-                return; // Don't submit if user didn't consent
+                return;
             }
             
             try {
@@ -465,7 +484,6 @@
             }
         }
 
-        // Data storage
         let surveyData = {
             consent: null,
             carbonMetric: null,
@@ -477,7 +495,6 @@
             severity: null
         };
 
-        // DOM elements
         const startPage = document.getElementById('start-page');
         const chatPage = document.getElementById('chat-page');
         const chatArea = document.getElementById('chat-area');
@@ -486,37 +503,31 @@
         const openBtn = document.getElementById('open-btn');
         const header = document.getElementById('header');
 
-        // Audio elements for sound effects
         const sendSound = new Audio('sent-ping.mp3');
         const receiveSound = new Audio('received-ping.mp3');
         
-        // Function to play send sound
         function playSendSound() {
             sendSound.currentTime = 0;
             sendSound.play().catch(e => console.log('Audio play failed:', e));
         }
         
-        // Function to play receive sound
         function playReceiveSound() {
             receiveSound.currentTime = 0;
             receiveSound.play().catch(e => console.log('Audio play failed:', e));
         }
 
-        // Helper functions
         function addMessage(text, type = 'bot') {
             const message = document.createElement('div');
             message.className = `message ${type}`;
             message.innerHTML = text;
             chatArea.appendChild(message);
             
-            // Play appropriate sound effect
             if (type === 'user') {
                 playSendSound();
             } else {
                 playReceiveSound();
             }
             
-            // Smooth scroll to keep messages visible
             setTimeout(() => {
                 message.scrollIntoView({ behavior: 'smooth', block: 'end' });
             }, 100);
@@ -544,10 +555,9 @@
             for (let i = 0; i < messages.length; i++) {
                 showTypingIndicator();
                 
-                // Calculate delay based on message length
-                const messageLength = messages[i].replace(/<[^>]*>/g, '').length; // Remove HTML tags for accurate length
+                const messageLength = messages[i].replace(/<[^>]*>/g, '').length;
                 const baseDelay = 1200;
-                const additionalDelay = Math.min(messageLength * 15, 2000); // Max 2 seconds additional
+                const additionalDelay = Math.min(messageLength * 15, 2000);
                 const totalDelay = baseDelay + additionalDelay;
                 
                 await new Promise(resolve => setTimeout(resolve, totalDelay));
@@ -555,7 +565,6 @@
                 addMessage(messages[i], 'bot');
                 
                 if (i < messages.length - 1) {
-                    // Add more gap between messages if current message is lengthy (>50 chars)
                     const gapDelay = messageLength > 50 ? 1400 : 800;
                     await new Promise(resolve => setTimeout(resolve, gapDelay));
                 }
@@ -617,20 +626,18 @@
             setTimeout(() => inputField.focus(), 100);
         }
 
-        // Calculation functions
         function calculatePhysicalSize(co2Tonnes, option) {
             const tvYears = (co2Tonnes * 1000000) / 196000000;
-            const volume = co2Tonnes / 1.56; // m³ - CORRECTED: Volume = Mass / Density (1000kg / 1560kg/m³ = 0.64m³ per tonne)
-            const courtLength = 28; // meters
+            const volume = co2Tonnes / 1.56;
+            const courtLength = 28;
             const courtExtension = volume / (courtLength * 15);
             const steps = (courtLength * courtExtension * 2) / 0.75;
-            const earthLandArea = 148940000; // km²
-            const footballFieldArea = 7140; // m² (105m x 68m) - CORRECTED from km²
-            const areaM2 = volume / 0.01; // Spread 1cm thick
+            const earthLandArea = 148940000;
+            const footballFieldArea = 7140;
+            const areaM2 = volume / 0.01;
             const fieldsNeeded = areaM2 / footballFieldArea;
-            const percentOfEarth = (fieldsNeeded * footballFieldArea / 1000000) / earthLandArea * 100; // Convert m² to km²
+            const percentOfEarth = (fieldsNeeded * footballFieldArea / 1000000) / earthLandArea * 100;
 
-            // Balcony size description with multiplier for very large volumes
             let balconyDescription = '';
             if (volume < 0.001) {
                 balconyDescription = '<strong>a tennis ball</strong>';
@@ -643,7 +650,6 @@
             } else if (volume < 50000) {
                 balconyDescription = '<strong>a university campus</strong>';
             } else {
-                // Calculate how many times a university campus (50,000 m³)
                 const campusMultiplier = (volume / 50000).toFixed(1);
                 balconyDescription = `<strong>${campusMultiplier} university campuses</strong>`;
             }
@@ -661,15 +667,15 @@
         function calculateQuantity(co2Tonnes, option) {
             const co2Kg = co2Tonnes * 1000;
             const coffeePerDay = 5;
-            const coffeeCupCO2 = 0.021; // kg per cup
+            const coffeeCupCO2 = 0.021;
             const totalCups = co2Kg / coffeeCupCO2;
             const days = totalCups / coffeePerDay;
-            const smartphoneCO2 = 80; // kg per phone (corrected from 0.08)
+            const smartphoneCO2 = 80;
             const smartphones = co2Kg / smartphoneCO2;
-            const bottleCO2 = 0.5; // kg per 2L bottle
+            const bottleCO2 = 0.5;
             const bottles = co2Kg / bottleCO2;
-            const partiesNeeded = bottles / 10; // assuming 10 bottles per party
-            const milkyWayStars = 250000000000; // average
+            const partiesNeeded = bottles / 10;
+            const milkyWayStars = 250000000000;
             const galaxyMultiplier = co2Kg / milkyWayStars;
 
             const responses = {
@@ -684,11 +690,11 @@
 
         function calculateWeight(co2Tonnes, option) {
             const co2Kg = co2Tonnes * 1000;
-            const adultWeight = 70; // kg
-            const coinWeight = 0.0056; // kg
-            const suitcaseWeight = 23; // kg
-            const carWeight = 1500; // kg
-            const captainAmericaLift = 450; // kg
+            const adultWeight = 70;
+            const coinWeight = 0.0056;
+            const suitcaseWeight = 23;
+            const carWeight = 1500;
+            const captainAmericaLift = 450;
 
             const responses = {
                 'Coins': `Imagine tossing and catching a single coin—now picture tossing <strong>${Math.round(co2Kg / coinWeight).toLocaleString()} coins</strong> in the air simultaneously.`,
@@ -702,51 +708,39 @@
 
         function calculateSeverity(co2Tonnes, option) {
             const co2Kg = co2Tonnes * 1000;
-            const co2Gt = co2Tonnes / 1000000000; // Convert to gigatonnes (Gt) - CORRECT: 1 Gt = 1 billion tonnes
-            const treeAbsorption = 22; // kg per year
+            const co2Gt = co2Tonnes / 1000000000;
+            const treeAbsorption = 22;
             const trees = co2Kg / treeAbsorption;
             
-            // Timeline to climate threshold - CORRECTED
-            const weeklyAdditionGt = co2Gt; // User's input as weekly addition in Gt
-            const totalBudgetGt = 500; // 500 Gt remaining for 1.5°C
+            const weeklyAdditionGt = co2Gt;
+            const totalBudgetGt = 500;
             const weeksToThreshold = totalBudgetGt / weeklyAdditionGt;
             const daysToThreshold = weeksToThreshold * 7;
 
-            // Calculate systemic impacts using TCRE (Transient Climate Response to Cumulative Emissions)
-            // TCRE ≈ 0.45°C per 1,000 Gt CO₂
-            const warmingPerThousandGt = 0.45; // °C
+            const warmingPerThousandGt = 0.45;
             const warming = (co2Gt / 1000) * warmingPerThousandGt;
             
-            // Sea level rise: approximately 2 meters per °C of warming (long-term)
-            const seaLevelRise = warming * 2.0; // meters
+            const seaLevelRise = warming * 2.0;
             
-            // Ocean acidification: pH drop of ~0.1 per 1,000 Gt CO₂
             const pHDrop = (co2Gt / 1000) * 0.1;
 
             let systemicImpactText = '';
             if (co2Gt < 0.000001) {
-                // Very small amounts (less than 1,000 tonnes)
                 systemicImpactText = `While this amount (${co2Tonnes.toLocaleString()} tonnes) seems small individually, every emission contributes to the cumulative atmospheric burden. At current global emission rates of ~40 billion tonnes/year, emissions of this scale accumulate rapidly, affecting climate patterns, ocean chemistry, and ecosystems over time.`;
             } else if (co2Gt < 0.001) {
-                // Small amounts (1,000 to 1 million tonnes)
-                const warmingMicroDegrees = warming * 1000000; // Convert to millionths of a degree
-                const seaLevelMicrons = seaLevelRise * 1000000000; // Convert to nanometers for display
+                const warmingMicroDegrees = warming * 1000000;
+                const seaLevelMicrons = seaLevelRise * 1000000000;
                 systemicImpactText = `This amount (${co2Tonnes.toLocaleString()} tonnes = ${co2Gt.toFixed(6)} Gt) contributes approximately <strong>${warmingMicroDegrees.toFixed(3)} millionths of a degree</strong> to global warming. While individually tiny, such emissions accumulate: if sustained globally at current rates, they drive measurable changes in weather patterns, agricultural yields, and sea levels over decades.`;
             } else if (co2Gt < 1) {
-                // Medium amounts (1 million to 1 billion tonnes)
-                const warmingMilliDegrees = warming * 1000; // Convert to thousandths
-                const seaLevelMM = seaLevelRise * 1000; // Convert to millimeters
+                const warmingMilliDegrees = warming * 1000;
+                const seaLevelMM = seaLevelRise * 1000;
                 systemicImpactText = `This level (${co2Tonnes.toLocaleString()} tonnes = ${co2Gt.toFixed(3)} Gt) drives approximately <strong>${warmingMilliDegrees.toFixed(4)} thousandths of a degree</strong> (${(warmingMilliDegrees/1000).toFixed(6)}°C) of warming and <strong>${seaLevelMM.toFixed(4)} mm</strong> of eventual sea level rise. A <strong>${pHDrop.toFixed(6)} pH drop</strong> in oceans. At this scale, repeated emissions create cascading disruptions in regional agriculture, water resources, and coastal infrastructure.`;
             } else if (co2Gt < 1000) {
-                // Large amounts (1 to 1,000 billion tonnes)
                 systemicImpactText = `This level (${co2Tonnes.toLocaleString()} tonnes = ${co2Gt.toFixed(2)} Gt) drives approximately <strong>${warming.toFixed(4)}°C</strong> of global warming, <strong>${seaLevelRise.toFixed(4)} meters</strong> of long-term sea level rise, and a <strong>${pHDrop.toFixed(4)} pH drop</strong> in oceans. This triggers major disruptions in global agriculture, water resources, coastal cities, supply chains, and human migration—each amplifying the others in feedback loops.`;
             } else {
-                // Very large amounts (1,000+ billion tonnes = 1+ trillion tonnes)
                 systemicImpactText = `At this massive scale (${co2Tonnes.toLocaleString()} tonnes = ${co2Gt.toLocaleString()} Gt), CO₂ would cause approximately <strong>${warming.toFixed(1)}°C</strong> of warming, <strong>${seaLevelRise.toFixed(0)} meters</strong> of sea level rise over centuries, and a <strong>${pHDrop.toFixed(2)} pH drop</strong> in oceans. This represents a fundamental restructuring of Earth's climate system, comparable to major geological transitions in our planet's history.`;
             }
 
-            // Historical CO2 levels (using actual atmospheric data)
-            // Conversion: 1 ppm = 7.8 Gt CO2
             let historicalContext = '';
             let historicalPeriod = '';
             
@@ -782,7 +776,6 @@
                 historicalPeriod = 'deep ice age periods';
             }
             
-            // New historical context message
             historicalContext = `In the deep history of Earth, <strong>${co2Gt.toExponential(2)} Gigatonnes</strong> is a microscopic fraction. It would take billions of inputs of this size to rival ${historicalPeriod}. However, unlike natural cycles, this carbon was released instantly and will linger in the atmosphere for centuries.`;
 
             const responses = {
@@ -795,7 +788,6 @@
             return responses[option];
         }
 
-        // Question flow
         async function startQuestionnaire() {
             startPage.classList.add('hidden');
             chatPage.classList.remove('hidden');
@@ -816,7 +808,6 @@
             
             showInput("Enter amount (e.g., 2500)", async (value) => {
                 surveyData.carbonMetric = value;
-                // Extract number from input
                 const match = value.match(/(\d+(?:\.\d+)?)/);
                 surveyData.carbonNumber = match ? parseFloat(match[1]) : 2500;
                 await askSource();
@@ -864,26 +855,21 @@
             ], async (choice) => {
                 surveyData.physicalSize = choice;
                 
-                // Show typing indicator before showing answer
                 showTypingIndicator();
                 
-                // Calculate the result
                 const co2Value = surveyData.carbonNumber;
                 const sizeResult = calculatePhysicalSize(co2Value, surveyData.physicalSize);
                 
-                // Longer delay for calculated results (based on length)
                 const messageLength = sizeResult.replace(/<[^>]*>/g, '').length;
-                const baseDelay = 2000; // Start with 2 seconds
-                const additionalDelay = Math.min(messageLength * 20, 3000); // Up to 3 seconds more
+                const baseDelay = 2000;
+                const additionalDelay = Math.min(messageLength * 20, 3000);
                 const totalDelay = baseDelay + additionalDelay;
                 
                 await new Promise(resolve => setTimeout(resolve, totalDelay));
                 hideTypingIndicator();
                 
-                // Play receive sound for calculated result
                 playReceiveSound();
                 
-                // Show the result
                 const sizeBox = `<div class="results-box">${sizeResult}</div>`;
                 const sizeMsg = document.createElement('div');
                 sizeMsg.innerHTML = sizeBox;
@@ -892,7 +878,6 @@
                     sizeMsg.firstChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
                 }, 100);
                 
-                // Add extra pause after result before next question
                 await new Promise(resolve => setTimeout(resolve, 1200));
                 
                 await askQuantity();
@@ -910,14 +895,11 @@
             ], async (choice) => {
                 surveyData.quantity = choice;
                 
-                // Show typing indicator before showing answer
                 showTypingIndicator();
                 
-                // Calculate the result
                 const co2Value = surveyData.carbonNumber;
                 const quantityResult = calculateQuantity(co2Value, surveyData.quantity);
                 
-                // Longer delay for calculated results
                 const messageLength = quantityResult.replace(/<[^>]*>/g, '').length;
                 const baseDelay = 2000;
                 const additionalDelay = Math.min(messageLength * 20, 3000);
@@ -926,10 +908,8 @@
                 await new Promise(resolve => setTimeout(resolve, totalDelay));
                 hideTypingIndicator();
                 
-                // Play receive sound for calculated result
                 playReceiveSound();
                 
-                // Show the result
                 const quantityBox = `<div class="results-box">${quantityResult}</div>`;
                 const quantityMsg = document.createElement('div');
                 quantityMsg.innerHTML = quantityBox;
@@ -938,7 +918,6 @@
                     quantityMsg.firstChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
                 }, 100);
                 
-                // Add extra pause after result
                 await new Promise(resolve => setTimeout(resolve, 1200));
                 
                 await askWeight();
@@ -956,14 +935,11 @@
             ], async (choice) => {
                 surveyData.weight = choice;
                 
-                // Show typing indicator before showing answer
                 showTypingIndicator();
                 
-                // Calculate the result
                 const co2Value = surveyData.carbonNumber;
                 const weightResult = calculateWeight(co2Value, surveyData.weight);
                 
-                // Longer delay for calculated results
                 const messageLength = weightResult.replace(/<[^>]*>/g, '').length;
                 const baseDelay = 2000;
                 const additionalDelay = Math.min(messageLength * 20, 3000);
@@ -972,10 +948,8 @@
                 await new Promise(resolve => setTimeout(resolve, totalDelay));
                 hideTypingIndicator();
                 
-                // Play receive sound for calculated result
                 playReceiveSound();
                 
-                // Show the result
                 const weightBox = `<div class="results-box">${weightResult}</div>`;
                 const weightMsg = document.createElement('div');
                 weightMsg.innerHTML = weightBox;
@@ -984,7 +958,6 @@
                     weightMsg.firstChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
                 }, 100);
                 
-                // Add extra pause after result
                 await new Promise(resolve => setTimeout(resolve, 1200));
                 
                 await askSeverity();
@@ -1002,14 +975,11 @@
             ], async (choice) => {
                 surveyData.severity = choice;
                 
-                // Show typing indicator before showing answer
                 showTypingIndicator();
                 
-                // Calculate the result
                 const co2Value = surveyData.carbonNumber;
                 const severityResult = calculateSeverity(co2Value, surveyData.severity);
                 
-                // Longer delay for calculated results
                 const messageLength = severityResult.replace(/<[^>]*>/g, '').length;
                 const baseDelay = 2000;
                 const additionalDelay = Math.min(messageLength * 20, 3000);
@@ -1018,10 +988,8 @@
                 await new Promise(resolve => setTimeout(resolve, totalDelay));
                 hideTypingIndicator();
                 
-                // Play receive sound for calculated result
                 playReceiveSound();
                 
-                // Show the result
                 const severityBox = `<div class="results-box">${severityResult}</div>`;
                 const severityMsg = document.createElement('div');
                 severityMsg.innerHTML = severityBox;
@@ -1030,12 +998,11 @@
                     severityMsg.firstChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
                 }, 100);
                 
-                // Extra long pause for complex messages
-                let pauseDelay = 1200; // Default
+                let pauseDelay = 1200;
                 if (choice === 'Systemic impacts') {
-                    pauseDelay = 2000; // 2 seconds for systemic impacts
+                    pauseDelay = 2000;
                 } else if (choice === 'Historical context') {
-                    pauseDelay = 2000; // 2 seconds for historical context
+                    pauseDelay = 2000;
                 }
                 await new Promise(resolve => setTimeout(resolve, pauseDelay));
                 
@@ -1044,7 +1011,6 @@
         }
 
         async function showResults() {
-            // Prepare data for Google Sheets
             const timestamp = new Date().toISOString();
             const responseData = {
                 timestamp: timestamp,
@@ -1059,13 +1025,11 @@
                 severity: surveyData.severity
             };
             
-            // Submit to Google Sheets if user consented
             await submitToGoogleSheets(responseData);
             
             await sendBotMessages(["Thank you for participating. Remember: this tool aids understanding but doesn't replace actual climate science. Keep learning."]);
             await sendBotMessages(["Share feedback using the link below"]);
 
-            // Show feedback button
             await new Promise(resolve => setTimeout(resolve, 1000));
             optionsContainer.innerHTML = '';
             const feedbackBtn = document.createElement('button');
@@ -1077,7 +1041,6 @@
             optionsContainer.appendChild(feedbackBtn);
         }
 
-        // Event listeners
         openBtn.addEventListener('click', startQuestionnaire);
         header.addEventListener('click', () => { 
             if (confirm('Refresh and start over?')) location.reload(); 
@@ -1085,5 +1048,3 @@
     </script>
 </body>
 </html>
-
-
