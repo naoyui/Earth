@@ -81,6 +81,25 @@
         }
     }
 
+    @media screen and (max-width: 500px) {
+        body {
+            padding: 0;
+        }
+
+        .phone-screen {
+            width: 100vw;
+            height: 100vh;
+            border-radius: 0;
+            box-shadow: none;
+            max-width: none;
+        }
+
+        .header {
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+    }
+
     .header {
         height: 50px;
         background: linear-gradient(135deg, var(--earth-primary) 0%, var(--earth-secondary) 100%);
@@ -182,7 +201,8 @@
         flex-direction: column;
         justify-content: flex-end;
         gap: 8px;
-        overflow-y: auto;
+        overflow-y: hidden;
+        overflow-x: hidden;
         scrollbar-width: none;
         min-height: 0;
         padding: 20px 0 0 0;
@@ -190,6 +210,31 @@
 
     .chat-area::-webkit-scrollbar {
         display: none;
+    }
+
+    .chat-area.scrollable {
+        overflow-y: scroll !important;
+        scrollbar-width: thin !important;
+        justify-content: flex-start;
+    }
+
+    .chat-area.scrollable::-webkit-scrollbar {
+        display: block !important;
+        width: 8px;
+    }
+
+    .chat-area.scrollable::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .chat-area.scrollable::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 4px;
+    }
+
+    .chat-area.scrollable::-webkit-scrollbar-thumb:hover {
+        background: #a1a1a1;
     }
 
     .message {
@@ -655,10 +700,10 @@
             }
 
             const responses = {
-                'TV screens': `Approximately 196 million TVs are produced worldwide each year. This amount of carbon would take <strong>${tvYears.toFixed(2)} years</strong> of global TV production to physically represent.`,
+                'TV screens': `Imagine needing a TV for each tonne of CO₂ in your amount. Global TV production would take <strong>${tvYears.toFixed(2)} years</strong> to match that quantity.`,
                 'Balcony area': `If you converted this carbon into physical volume, it would cover a balcony the size of ${balconyDescription}.`,
-                'Basketball court': `If you stretched a basketball court <strong>${courtExtension.toFixed(1)} times</strong> its length and placed hoops only at the ends, a player would need to walk <strong>${Math.round(steps)} steps</strong> to reach the basket.`,
-                'Football fields': `This would cover <strong>${percentOfEarth.toFixed(6)}%</strong> of Earth's land surface in back-to-back football fields, totaling approximately <strong>${Math.round(fieldsNeeded).toLocaleString()} fields</strong>.`
+                'Basketball court': `Imagine a basketball court whose floor is made from the carbon number you just entered, compressed into solid form. This would stretch the court <strong>${courtExtension.toFixed(1)} times</strong>. To cross and score a goal on the side, you'd have to run <strong>${Math.round(steps)} steps</strong>.`,
+                'Football fields': `If you converted this carbon number into a solid flat sheet that covers the football field instead of grass, you'd need <strong>${Math.round(fieldsNeeded).toLocaleString()} fields</strong> to contain it all. That's <strong>${percentOfEarth.toFixed(6)}%</strong> of Earth's entire land surface.`
             };
 
             return responses[option];
@@ -679,9 +724,9 @@
             const galaxyMultiplier = co2Kg / milkyWayStars;
 
             const responses = {
-                'Coffee cups': `Adults safely consume 4-5 cups of coffee daily. It would take you <strong>${Math.round(days).toLocaleString()} days</strong> to finish <strong>${Math.round(totalCups).toLocaleString()} cups</strong>.`,
+                'Coffee cups': `A safe daily limit for coffee is 4-5 cups. Similarly, carbon emissions have safe limits. This amount is equivalent to <strong>${Math.round(days).toLocaleString()} days</strong> of maximum-safe coffee consumption - <strong>${Math.round(totalCups).toLocaleString()} cups</strong> total. Look back at your number & check the period it was emitted in. How does that compare to the cups you drank?`,
                 'Smartphones': `Imagine carrying <strong>${Math.round(smartphones).toLocaleString()} smartphones</strong> with you every time you leave the house—that's the quantity we're talking about.`,
-                '2-liter bottles': `A 2-liter bottle typically empties quickly at a gathering. You'd need to host <strong>${Math.round(partiesNeeded).toLocaleString()} small parties</strong> to go through <strong>${Math.round(bottles).toLocaleString()} bottles</strong>.`,
+                '2-liter bottles': `A two-liter bottle typically empties quickly at a gathering. You'd need to host <strong>${Math.round(partiesNeeded).toLocaleString()} small parties</strong> to go through <strong>${Math.round(bottles).toLocaleString()} bottles</strong>. Given Earth's carbon budget, how many such gatherings can we afford globally?`,
                 'Stars': `The Milky Way contains 100-400 billion stars. This carbon count equals our entire galaxy multiplied by <strong>${galaxyMultiplier.toFixed(8)}</strong>.`
             };
 
@@ -861,7 +906,12 @@
                 const sizeResult = calculatePhysicalSize(co2Value, surveyData.physicalSize);
                 
                 const messageLength = sizeResult.replace(/<[^>]*>/g, '').length;
-                const baseDelay = 2000;
+                let baseDelay = 3000;
+                if (surveyData.physicalSize === 'TV screens' || 
+                    surveyData.physicalSize === 'Basketball court' || 
+                    surveyData.physicalSize === 'Football fields') {
+                    baseDelay = 4000;
+                }
                 const additionalDelay = Math.min(messageLength * 20, 3000);
                 const totalDelay = baseDelay + additionalDelay;
                 
@@ -878,7 +928,7 @@
                     sizeMsg.firstChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
                 }, 100);
                 
-                await new Promise(resolve => setTimeout(resolve, 1200));
+                await new Promise(resolve => setTimeout(resolve, 5500));
                 
                 await askQuantity();
             });
@@ -901,7 +951,11 @@
                 const quantityResult = calculateQuantity(co2Value, surveyData.quantity);
                 
                 const messageLength = quantityResult.replace(/<[^>]*>/g, '').length;
-                const baseDelay = 2000;
+                let baseDelay = 3000;
+                if (surveyData.quantity === 'Coffee cups' || 
+                    surveyData.quantity === '2-liter bottles') {
+                    baseDelay = 4000;
+                }
                 const additionalDelay = Math.min(messageLength * 20, 3000);
                 const totalDelay = baseDelay + additionalDelay;
                 
@@ -918,7 +972,7 @@
                     quantityMsg.firstChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
                 }, 100);
                 
-                await new Promise(resolve => setTimeout(resolve, 1200));
+                await new Promise(resolve => setTimeout(resolve, 5500));
                 
                 await askWeight();
             });
@@ -941,7 +995,7 @@
                 const weightResult = calculateWeight(co2Value, surveyData.weight);
                 
                 const messageLength = weightResult.replace(/<[^>]*>/g, '').length;
-                const baseDelay = 2000;
+                const baseDelay = 3000;
                 const additionalDelay = Math.min(messageLength * 20, 3000);
                 const totalDelay = baseDelay + additionalDelay;
                 
@@ -958,7 +1012,7 @@
                     weightMsg.firstChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
                 }, 100);
                 
-                await new Promise(resolve => setTimeout(resolve, 1200));
+                await new Promise(resolve => setTimeout(resolve, 4000));
                 
                 await askSeverity();
             });
@@ -981,7 +1035,11 @@
                 const severityResult = calculateSeverity(co2Value, surveyData.severity);
                 
                 const messageLength = severityResult.replace(/<[^>]*>/g, '').length;
-                const baseDelay = 2000;
+                let baseDelay = 3000;
+                if (surveyData.severity === 'Historical context' || 
+                    surveyData.severity === 'Systemic impacts') {
+                    baseDelay = 4000;
+                }
                 const additionalDelay = Math.min(messageLength * 20, 3000);
                 const totalDelay = baseDelay + additionalDelay;
                 
@@ -998,11 +1056,11 @@
                     severityMsg.firstChild.scrollIntoView({ behavior: 'smooth', block: 'end' });
                 }, 100);
                 
-                let pauseDelay = 1200;
+                let pauseDelay = 5500;
                 if (choice === 'Systemic impacts') {
-                    pauseDelay = 2000;
+                    pauseDelay = 6000;
                 } else if (choice === 'Historical context') {
-                    pauseDelay = 2000;
+                    pauseDelay = 6000;
                 }
                 await new Promise(resolve => setTimeout(resolve, pauseDelay));
                 
@@ -1039,6 +1097,19 @@
                 window.open(FEEDBACK_URL, '_blank');
             };
             optionsContainer.appendChild(feedbackBtn);
+
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await sendBotMessages(["Also, you can now scroll through the conversation to review your comparisons."]);
+
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            chatArea.classList.add('scrollable');
+            
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    chatArea.scrollTop = chatArea.scrollHeight;
+                });
+            });
         }
 
         openBtn.addEventListener('click', startQuestionnaire);
