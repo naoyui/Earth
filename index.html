@@ -702,8 +702,8 @@
             const responses = {
                 'TV screens': `Imagine needing a TV for each tonne of CO₂ in your amount. Global TV production would take <strong>${tvYears.toFixed(2)} years</strong> to match that quantity.`,
                 'Balcony area': `If you converted this carbon into physical volume, it would cover a balcony the size of ${balconyDescription}.`,
-                'Basketball court': `Imagine a basketball court whose floor is made from the carbon number you just entered, compressed into solid form. This would stretch the court <strong>${courtExtension.toFixed(1)} times</strong>. To cross and score a goal on the side, you'd have to run <strong>${Math.round(steps)} steps</strong>.`,
-                'Football fields': `If you converted this carbon number into a solid flat sheet that covers the football field instead of grass, you'd need <strong>${Math.round(fieldsNeeded).toLocaleString()} fields</strong> to contain it all. That's <strong>${percentOfEarth.toFixed(6)}%</strong> of Earth's entire land surface.`
+                'Basketball court': `Imagine a basketball court whose floor is made from the carbon number you just entered. This would stretch the court <strong>${courtExtension.toFixed(1)} times</strong>. To cross and score a goal on the side, you'd have to run <strong>${Math.round(steps)} steps</strong>.`,
+                'Football fields': `If you converted this carbon number into a solid flat sheet that covers the football field, you'd need <strong>${Math.round(fieldsNeeded).toLocaleString()} fields</strong> to contain it all. That's <strong>${percentOfEarth.toFixed(6)}%</strong> of Earth's entire land surface.`
             };
 
             return responses[option];
@@ -724,7 +724,7 @@
             const galaxyMultiplier = co2Kg / milkyWayStars;
 
             const responses = {
-                'Coffee cups': `A safe daily limit for coffee is 4-5 cups. Similarly, carbon emissions have safe limits. This amount is equivalent to <strong>${Math.round(days).toLocaleString()} days</strong> of maximum-safe coffee consumption - <strong>${Math.round(totalCups).toLocaleString()} cups</strong> total. Look back at your number & check the period it was emitted in. How does that compare to the cups you drank?`,
+                'Coffee cups': `A safe daily limit for coffee is 4-5 cups. Similarly, carbon emissions have safe limits. This amount is equivalent to <strong>${Math.round(days).toLocaleString()} days</strong> of maximum-safe coffee consumption - <strong>${Math.round(totalCups).toLocaleString()} cups</strong> total. Look back at your number & check the period it was emitted in.`,
                 'Smartphones': `Imagine carrying <strong>${Math.round(smartphones).toLocaleString()} smartphones</strong> with you every time you leave the house—that's the quantity we're talking about.`,
                 '2-liter bottles': `A two-liter bottle typically empties quickly at a gathering. You'd need to host <strong>${Math.round(partiesNeeded).toLocaleString()} small parties</strong> to go through <strong>${Math.round(bottles).toLocaleString()} bottles</strong>. Given Earth's carbon budget, how many such gatherings can we afford globally?`,
                 'Stars': `The Milky Way contains 100-400 billion stars. This carbon count equals our entire galaxy multiplied by <strong>${galaxyMultiplier.toFixed(8)}</strong>.`
@@ -930,6 +930,14 @@
                 
                 await new Promise(resolve => setTimeout(resolve, 5500));
                 
+                const fillerMessages = {
+                    'TV screens': "Now you can picture the production scale behind that number.",
+                    'Balcony area': "Does that space help you visualize it?",
+                    'Basketball court': "That's one way to feel how much volume we're actually talking about.",
+                    'Football fields': "So that's the footprint your number leaves."
+                };
+                await sendBotMessages([fillerMessages[surveyData.physicalSize]]);
+                
                 await askQuantity();
             });
         }
@@ -974,6 +982,14 @@
                 
                 await new Promise(resolve => setTimeout(resolve, 5500));
                 
+                const fillerMessages = {
+                    'Coffee cups': "That translates your number into a daily ritual.",
+                    'Smartphones': "Does thinking in devices make the count clearer?",
+                    '2-liter bottles': "That's your number in social terms.",
+                    'Stars': "That's the cosmic scale we're comparing against."
+                };
+                await sendBotMessages([fillerMessages[surveyData.quantity]]);
+                
                 await askWeight();
             });
         }
@@ -1013,6 +1029,14 @@
                 }, 100);
                 
                 await new Promise(resolve => setTimeout(resolve, 4000));
+                
+                const fillerMessages = {
+                    'Coins': "Even small objects add up to serious mass.",
+                    'Suitcases': "That's what moving this amount would actually feel like.",
+                    'People': "So that's the human-scale weight.",
+                    'Cars': "That's the kind of strength needed to handle this mass."
+                };
+                await sendBotMessages([fillerMessages[surveyData.weight]]);
                 
                 await askSeverity();
             });
@@ -1063,6 +1087,14 @@
                     pauseDelay = 6000;
                 }
                 await new Promise(resolve => setTimeout(resolve, pauseDelay));
+                
+                const fillerMessages = {
+                    'Natural solutions': "That's what offsetting your number would actually require.",
+                    'Timeline to climate threshold': "So that's how fast repetition becomes dangerous.",
+                    'Historical context': "That shows where your number sits in geological time.",
+                    'Systemic impacts': "That's the cascade your number triggers."
+                };
+                await sendBotMessages([fillerMessages[surveyData.severity]]);
                 
                 await showResults();
             });
